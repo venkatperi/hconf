@@ -1,9 +1,10 @@
 {
-  "name": "node-log",
+  "name": "node-conf",
   "version": "0.1.0",
   "preferGlobal": false,
-  "description": "Wrapper around winstonjs",
+  "description": "Wrapper nconf",
   "dependencies": {
+    "app-root-path": "^1.0.0",
     "colors": "^1.1.2",
     "moment": "^2.12.0",
     "nconf": "^0.7.1",
@@ -17,7 +18,7 @@
     "npm": ">= 1.0.0"
   },
   "bundleDependencies": [],
-  "main": "lib/Log.coffee",
+  "main": "lib/conf.coffee",
   "devDependencies": {
     "coffee-script": "^1.8.0",
     "coffeeify": "~0.7.0",
