@@ -1,6 +1,6 @@
 {
   "name": "hconf",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/venkatperi/hconf.git"
@@ -15,7 +15,7 @@
     "npm": ">= 1.0.0"
   },
   "bundleDependencies": [],
-  "main": "index.coffee",
+  "main": "dist/index",
   "scripts": {
     "prepublish": "grunt",
     "test": "echo \"Error: no test specified\" && exit 1"
