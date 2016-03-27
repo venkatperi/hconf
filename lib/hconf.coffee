@@ -4,30 +4,50 @@ _ = require "underscore"
 
 HOME_DIR = process.env.HOME
 stores = []
+provider = new nconf.Provider()
 
-class Conf
-  constructor : ( {@name, @filename, @dirs, @defaults, @overrides} ) ->
-    throw new Error "missing name" unless @name?
-    @filename = ".#{@name}" unless @filename?
+hconf = ( opts ) ->
+  name = opts.name
+  throw new Error "missing name" unless name?
+  opts.filename = ".#{name}" unless opts.filename?
 
-    stores.push name : "#{@name}:defaults", type : 'literal', store : @defaults if @defaults?
-    stores.push name : "#{@name}:user", type : 'file', file : path.join( HOME_DIR, @filename )
+  if opts.defaults?
     stores.push
-      name : "#{@name}:#{name}", type : 'file', file : path.join( dir, @filename ) for own name, dir of @dirs if @dirs?
-    stores.push name : "#{@name}:overrides", type : 'literal', store : @overrides if @overrides?
+      name : "#{name}:defaults",
+      type : 'literal',
+      store : opts.defaults
 
-    @init()
+  stores.push
+    name : "#{name}:user",
+    type : 'file',
+    file : path.join( HOME_DIR, opts.filename )
 
-  init : =>
-    for store in stores.reverse()
-      store = _.clone store
-      name = store.name
-      delete store.name
-      nconf.use name, store
+  if opts.dirs?
+    for own n, dir of opts.dirs
+      stores.push
+        name : "#{name}:#{n}",
+        type : 'file',
+        file : path.join( dir, opts.filename )
 
-  get : ( key ) =>
-    nconf.get key
+  if opts.overrides?
+    stores.push
+      name : "#{name}:overrides",
+      type : 'literal',
+      store : opts.overrides
 
+  init()
+  hconf
 
-module.exports = ( opts ) -> new Conf( opts ) 
+init = hconf.init = ->
+  provider = new nconf.Provider()
+  for store in stores.reverse()
+    store = _.clone store
+    name = store.name
+    delete store.name
+    provider.use name, store
+
+hconf.get = ( key ) ->
+  provider.get key
+
+module.exports = hconf
 
