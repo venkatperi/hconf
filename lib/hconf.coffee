@@ -3,8 +3,14 @@ path = require "path"
 _ = require "underscore"
 
 HOME_DIR = process.env.HOME
-stores = []
-provider = new nconf.Provider()
+
+unless global.hconf?
+  global.hconf =
+    stores : []
+    provider : new nconf.Provider()
+
+stores = global.hconf.stores
+provider = global.hconf.provider
 
 hconf = ( opts ) ->
   name = opts.name
@@ -39,7 +45,7 @@ hconf = ( opts ) ->
   hconf
 
 init = hconf.init = ->
-  provider = new nconf.Provider()
+  provider = global.hconf.provider = new nconf.Provider()
   for store in stores.reverse()
     store = _.clone store
     name = store.name
