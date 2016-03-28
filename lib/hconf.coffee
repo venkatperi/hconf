@@ -46,6 +46,7 @@ hconf = ( opts ) ->
 
 init = hconf.init = ->
   provider = global.hconf.provider = new nconf.Provider()
+  console.log stores.reverse()
   for store in stores.reverse()
     store = _.clone store
     name = store.name
@@ -54,6 +55,9 @@ init = hconf.init = ->
 
 hconf.get = ( key ) ->
   provider.get key
+
+hconf.stores = -> global.hconf.stores
+hconf.provider = -> global.hconf.provider
 
 module.exports = hconf
 
