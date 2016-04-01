@@ -1,63 +1,25 @@
-nconf = require( "nconf" )
-path = require "path"
+Conf = require "./Conf"
 _ = require "underscore"
 
-HOME_DIR = process.env.HOME
+provider = new Conf
 
-unless global.hconf?
-  global.hconf =
-    stores : []
-    provider : new nconf.Provider()
+hconf = ( opts ) -> provider.loadForModule opts
 
-stores = global.hconf.stores
-provider = global.hconf.provider
+hconf = _.extend hconf,
+  provider : provider
+  Conf : Conf
 
-hconf = ( opts ) ->
-  name = opts.name
-  throw new Error "missing name" unless name?
-  opts.filename = ".#{name}" unless opts.filename?
+###
+# make hconf a Q promise, so that we can do:
+#   hconf.then ->
+###
 
-  if opts.defaults?
-    stores.push
-      name : "#{name}:defaults",
-      type : 'literal',
-      store : opts.defaults
+#for f in [ "then", "promiseDispatch" ]
+#  hconf[ f ] = provider.ready[ f ]
 
-  stores.push
-    name : "#{name}:user",
-    type : 'file',
-    file : path.join( HOME_DIR, opts.filename )
+for f in [ "ready", "get", "getObject", "watch", "unwatch", "unwatchAll" ]
+  hconf[ f ] = provider[ f ]
 
-  if opts.dirs?
-    for own n, dir of opts.dirs
-      stores.push
-        name : "#{name}:#{n}",
-        type : 'file',
-        file : path.join( dir, opts.filename )
-
-  if opts.overrides?
-    stores.push
-      name : "#{name}:overrides",
-      type : 'literal',
-      store : opts.overrides
-
-  init()
-  hconf
-
-init = hconf.init = ->
-  provider = global.hconf.provider = new nconf.Provider()
-  console.log stores.reverse()
-  for store in stores.reverse()
-    store = _.clone store
-    name = store.name
-    delete store.name
-    provider.use name, store
-
-hconf.get = ( key ) ->
-  provider.get key
-
-hconf.stores = -> global.hconf.stores
-hconf.provider = -> global.hconf.provider
 
 module.exports = hconf
 

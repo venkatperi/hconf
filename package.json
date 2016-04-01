@@ -8,7 +8,15 @@
   "preferGlobal": false,
   "description": "Hierarchical configs using nconf",
   "dependencies": {
-    "nconf": "^0.7.1"
+    "minimatch": "^3.0.0",
+    "moduletag": "^0.1.0",
+    "nconf": "^0.7.1",
+    "node-walkup": "^1.0.1",
+    "objnest": "^2.0.3",
+    "observable-map": "0.0.4",
+    "observable-set": "0.0.4",
+    "pkginfo": "^0.4.0",
+    "q": "^1.4.1"
   },
   "engines": {
     "node": ">= 0.6.0",

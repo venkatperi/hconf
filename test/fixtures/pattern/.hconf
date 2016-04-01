@@ -1,0 +1,8 @@
+{
+  "hconf": {
+    "pattern": {
+      "unique": -1
+    },
+    "common": "from pattern"
+  }
+}

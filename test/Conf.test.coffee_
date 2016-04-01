@@ -1,0 +1,31 @@
+should = require( "should" )
+assert = require( "assert" )
+Conf = require '../lib/Conf'
+path = require "path"
+
+name = ".testconf"
+fixtures = path.join __dirname, "fixtures"
+dir1 = path.join __dirname, "fixtures", "dir1"
+dir2 = path.join __dirname, "fixtures", "dir2"
+
+describe "Conf", ->
+
+  it "loads JSON files", ( done ) ->
+    conf = new Conf()
+    conf.add type : "file", file : path.join( dir1, name )
+    conf.data.common.should.equal "from dir1"
+    done()
+
+  it "merges multiple sources", ( done ) ->
+    conf = new Conf()
+    conf.add type : "file", file : path.join( dir1, name )
+    conf.add type : "file", file : path.join( dir2, name )
+    conf.data.common.should.equal "from dir2"
+    done()
+
+  it "fires an event on changes", ( done ) ->
+    conf = new Conf()
+    conf.on "changed", done
+    conf.add type : "file", file : path.join( dir1, name )
+
+

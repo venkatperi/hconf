@@ -1,0 +1,8 @@
+{
+  "hconf": {
+    "dir2": {
+      "unique": 2
+    },
+    "common": "from dir2"
+  }
+}
