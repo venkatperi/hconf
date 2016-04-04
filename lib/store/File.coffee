@@ -3,14 +3,18 @@ dfs = denodeified.fs
 fs = require "fs"
 path = require "path"
 Store = require "./Store"
-JsonFormat = require "../formats/JsonFormat"
+Format = require "../format"
 
 module.exports = class FileStore extends Store
 
   constructor : ( opts = {} ) ->
+    opts.type = "file"
     @file = opts.file or throw new Error( "missing option: file" )
-    @format = opts.format or JsonFormat
+    @format = Format.create type: opts.format or "json"
     super opts
+
+  uri : =>
+    "#{super()}:#{@file}"
 
   load : =>
     dfs.stat @file
@@ -45,6 +49,3 @@ module.exports = class FileStore extends Store
       @data = @format.parse( fileData )
     catch ex
       throw new Error( 'Error parsing your configuration file: [' + @file + ']: ' + ex.message )
-
-
-

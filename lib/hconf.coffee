@@ -3,23 +3,19 @@ _ = require "underscore"
 
 provider = new Conf
 
-hconf = ( opts ) -> provider.loadForModule opts
+hconf = ( opts ) ->
+  provider.loadForModule opts
+  hconf
 
 hconf = _.extend hconf,
   provider : provider
   Conf : Conf
+  FileStore : require "./store/File"
 
-###
-# make hconf a Q promise, so that we can do:
-#   hconf.then ->
-###
+[ "then", "fail", "done", "promiseDispatch" ].forEach (f) ->
+  hconf[ f ] = (args) ->  provider.initialized[ f ] args
 
-#for f in [ "then", "promiseDispatch" ]
-#  hconf[ f ] = provider.ready[ f ]
-
-for f in [ "ready", "get", "getObject", "watch", "unwatch", "unwatchAll" ]
+[ "clear", "ready", "get", "getObject", "watch", "unwatch", "unwatchAll" ].forEach (f) ->
   hconf[ f ] = provider[ f ]
 
-
 module.exports = hconf
-

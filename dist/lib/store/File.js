@@ -1,4 +1,4 @@
-var FileStore, JsonFormat, Store, denodeified, dfs, fs, path,
+var FileStore, Format, Store, denodeified, dfs, fs, path,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -13,7 +13,7 @@ path = require("path");
 
 Store = require("./Store");
 
-JsonFormat = require("../formats/JsonFormat");
+Format = require("../format");
 
 module.exports = FileStore = (function(_super) {
   __extends(FileStore, _super);
@@ -24,12 +24,20 @@ module.exports = FileStore = (function(_super) {
     }
     this.loadSync = __bind(this.loadSync, this);
     this.load = __bind(this.load, this);
+    this.uri = __bind(this.uri, this);
+    opts.type = "file";
     this.file = opts.file || (function() {
       throw new Error("missing option: file");
     })();
-    this.format = opts.format || JsonFormat;
+    this.format = Format.create({
+      type: opts.format || "json"
+    });
     FileStore.__super__.constructor.call(this, opts);
   }
+
+  FileStore.prototype.uri = function() {
+    return "" + (FileStore.__super__.uri.call(this)) + ":" + this.file;
+  };
 
   FileStore.prototype.load = function() {
     return dfs.stat(this.file).then((function(_this) {

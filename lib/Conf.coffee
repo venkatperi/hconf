@@ -1,102 +1,116 @@
-FileStore = require "./stores/FileStore"
+path = require "path"
 _ = require "underscore"
-ObservableMap = require "observable-map"
 minimatch = require "minimatch"
 Q = require "q"
-path = require "path"
 pkgInfo = require "pkginfo-async"
 Seq = require "seqx"
+ManualTimer = require "./utils/ManualTimer"
+Backend = require "./backend"
+Store = require "./store"
+conventions = require "./conventions"
+custom = require "./conventions/custom"
+asArray = require './utils/asArray'
 
-HOME_DIR = process.env.HOME
+# Public: our Configuration Provider.
+class Conf
 
-backends =
-  global : require "./backends/Global"
+  constructor : ( @opts = {} ) ->
+    @clear()
 
-module.exports = class Conf
-
-  constructor : ( opts = {} ) ->
-    @createBackend opts.backend
+  clear : =>
+    @initialize = Q.defer()
+    @initialized = @initialize.promise
     @seq = new Seq()
-    @stores = []
+    @backend = Backend.create type : "global"
+    @stores = new Set()
+    @sources = {}
+    @initTimer = new ManualTimer (=> @initialize.resolve true), 100
 
-  add : ( store ) =>
-    @seq.add => @createStore store
-    @seq.add @addStore
 
+  # Public: Gets the specified config property (can be nested e.g. a.b.c)
+  #
+  # * `name ` The property path as {String}.
+  #
+  # Returns a promise which resolves to the property value, or `undefined`.
   get : ( name ) =>
     @initialized.then =>
-      @seq.add => @backend.get name
+      @backend.get name
 
-  getObject : ( name ) =>
-    @initialized.then =>
-      @seq.add => @backend.getObject name
-
+  # Public: Add watcher(s) for a property (can be a nested/glob/wildcard)
+  #
+  # * `keys` The key or array of keys to watch as {String|[String]}.
+  # * `cb `  The function to call when a watched property changes as {function}.
   watch : ( keys, cb ) =>
     @backend.watch keys, cb
 
+  # Public: Removes previously added watchers
+  #
+  # * `keys` The key or array of keys as {String|[String]}.
+  # * `cb `  The function to call when a watched property changes as {function}.
   unwatch : ( keys, cb ) =>
     @backend.unwatch keys, cb
 
+  # Public: Remove all watches for the specified keys
+  #
+  # * `keys` The key or array of keys as {String|[String]}.
   unwatchAll : ( keys ) =>
     @backend.unwatch keys
 
-#Private
+  # Private: Add a store to the config
+  #
+  # * `store ` The [description] as {[type]}.
+  #
+  # Returns the [Description] as `undefined`.
+  add : ( store, mod ) =>
+    @seq.add => @createStore store, mod
+    @seq.add ( s ) => @backend.extend s.data if s?
 
-  createStore : ( store ) =>
-    handler = @[ "__#{store.type.toLowerCase()}StoreCreate" ] if store?.type?
-    throw new Error "bad or missing type for store" unless handler
-    handler( store )?.load()
-
-  addStore : ( s ) =>
+  # Public: [Description]
+  #
+  # * `store ` The [description] as {[type]}.
+  #
+  # Returns the [Description] as `undefined`.
+  createStore : ( opts, mod ) =>
+    s = Store.create opts
     return unless s?
-    @stores.push s
-    @backend.extend s.data
-    for own k,v of s.flatten()
-      @backend.set k, v
+    uri = s.uri()
+    @sources[ uri ] = [] unless @sources[ uri ]?
+    @sources[ uri ].push mod.filename or mod.id
+    return if @stores.has uri
+    @stores.add uri
+    s.load()
 
-  __fileStoreCreate : ( store ) =>
-    new FileStore( store )
 
-  convention : ( opts ) => ( pkg ) =>
-    name = pkg.name
-    filename = opts.filename or ".#{name}"
-
-    @add
-      name : pkg.name
-      description : "factory defaults",
-      type : 'file',
-      file : path.join pkg.dirname, filename
-
-    @add
-      name : pkg.name
-      description : "user",
-      type : 'file',
-      file : path.join( HOME_DIR, filename )
-
-    if opts.files?
-      opts.files = [ opts.files ] unless _.isArray opts.files
-      for f in opts.files
-        @add
-          name : pkg.name
-          description : "custom file",
-          type : 'file',
-          file : f
-
+  # Public: [Description]
+  #
+  # * `opts ` The [description] as {[type]}.
+  #
+  # Returns the [Description] as `undefined`.
   loadForModule : ( opts ) =>
-    @initialize = Q.defer()
-    @initialized = @initialize.promise
-    opts = {} unless opts?
-    throw new Error "missing option: module" unless opts.module?
+    @initTimer.stop()
+    @actualLoad opts
 
+  # Public: [Description]
+  #
+  # * `opts ` The [description] as {[type]}.
+  #
+  # Returns the [Description] as `undefined`.
+  actualLoad : ( opts ) =>
+    throw new Error "missing option: module" unless opts?.module?
     @seq.add -> pkgInfo opts.module
     @seq.add @convention opts
-    @seq.add => @initialize.resolve true
+    @seq.add => @initTimer.start()
 
-  createBackend : ( opts ) =>
-    opts = { type : "global" } unless opts?
-    b = backends[ opts.type ]
-    throw new Error "Unknown backend type: #{opts.type}" unless b
-    @backend = new b opts
-    
-    
-    
+  # Public: [Description]
+  #
+  # * `pkg ` The [description] as {[type]}.
+  #
+  # Returns the [Description] as `undefined`.
+  convention : ( opts ) => ( pkg ) =>
+    conventions.forEach ( c ) =>
+      @add c( pkg : pkg, filename : opts.filename ), opts.module
+
+    if opts.files?
+      @add custom( pkg : pkg, file : f ), opts.module for f in asArray opts.files
+
+module.exports = Conf

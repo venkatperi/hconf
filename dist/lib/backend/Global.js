@@ -1,4 +1,4 @@
-var Backend, Global, ObservableMap, data, data2, isGlob, minimatch, _,
+var Backend, Global, ObservableMap, deepExtend, isGlob, minimatch, observable, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -11,6 +11,10 @@ minimatch = require("minimatch");
 
 Backend = require('./Backend');
 
+observable = require("observable");
+
+deepExtend = require("../utils/deepExtend");
+
 isGlob = function(key) {
   return /[\*\+\{\}]/.test;
 };
@@ -18,15 +22,10 @@ isGlob = function(key) {
 if (global.hconf == null) {
   global.hconf = {
     global: {
-      data: new ObservableMap(),
-      data2: {}
+      data: observable({})
     }
   };
 }
-
-data = global.hconf.global.data;
-
-data2 = global.hconf.global.data2;
 
 Global = (function(_super) {
   __extends(Global, _super);
@@ -38,36 +37,52 @@ Global = (function(_super) {
     this.unwatchAll = __bind(this.unwatchAll, this);
     this.unwatch = __bind(this.unwatch, this);
     this.watch = __bind(this.watch, this);
-    this.getObject = __bind(this.getObject, this);
     this.extend = __bind(this.extend, this);
-    this.set = __bind(this.set, this);
     this.get = __bind(this.get, this);
+    this.set = __bind(this.set, this);
     this.watchers = {};
     this.globWatchers = {};
-    data.on("change", this.onDataChanged);
+    this.data = global.hconf.global.data;
+    if (this.data == null) {
+      throw new Error("no data?");
+    }
+    this.data.on("changed", this.onDataChanged);
   }
 
-  Global.prototype.get = function(name) {
-    return data.get(name);
-  };
-
   Global.prototype.set = function(name, value) {
-    return data.set(name, value);
-  };
-
-  Global.prototype.extend = function(d) {
-    return global.hconf.global.data2 = _.extend(data2, d);
-  };
-
-  Global.prototype.getObject = function(name) {
-    var d, p, parts, _i, _len;
+    var d, p, parts, _i, _len, _ref;
     parts = name.split(".");
-    d = data2;
+    d = this.data;
+    _ref = parts.slice(0, -1);
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      p = _ref[_i];
+      if (d[p] == null) {
+        d[p] = {};
+      }
+      d = d[p];
+    }
+    return d[parts[parts.length - 1]] = value;
+  };
+
+  Global.prototype.get = function(name) {
+    var d, p, parts, _i, _len;
+    if (name == null) {
+      return;
+    }
+    parts = name.split(".");
+    d = this.data;
     for (_i = 0, _len = parts.length; _i < _len; _i++) {
       p = parts[_i];
       d = d[p];
+      if (d == null) {
+        return;
+      }
     }
     return d;
+  };
+
+  Global.prototype.extend = function(source) {
+    return deepExtend(this.data, source);
   };
 
   Global.prototype.watch = function(keys, cb) {
@@ -112,19 +127,19 @@ Global = (function(_super) {
     }
   };
 
-  Global.prototype.onDataChanged = function(e) {
+  Global.prototype.onDataChanged = function(key, old, value) {
     var callbacks, glob, _ref, _results;
-    this.getWatchers(e.key).forEach(function(cb) {
-      return cb(e);
+    this.getWatchers(key).forEach(function(cb) {
+      return cb(key, old, value);
     });
     _ref = this.globWatchers;
     _results = [];
     for (glob in _ref) {
       if (!__hasProp.call(_ref, glob)) continue;
       callbacks = _ref[glob];
-      if (minimatch(e.key, glob)) {
+      if (minimatch(key, glob)) {
         _results.push(callbacks.forEach(function(cb) {
-          return cb(e);
+          return cb(key, old, value);
         }));
       } else {
         _results.push(void 0);

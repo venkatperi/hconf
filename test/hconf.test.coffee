@@ -7,9 +7,12 @@ fixtures = path.join __dirname, "fixtures"
 
 describe "hconf", ->
 
+  beforeEach ->
+    hconf.clear()
+
   it "loads default configs", ( done ) ->
     hconf module : module
-    
+
     hconf.get( "hconf.factory" )
     .then ( val ) ->
       assert.notEqual val, undefined, "get() must return an object"
@@ -33,20 +36,10 @@ describe "hconf", ->
     .fail done
     .done()
 
-  it "fetch an object", ( done ) ->
-    hconf.getObject( "hconf" )
-    .then ( val ) ->
-      val.common.should.equal "from dir1"
-      val.dir1.unique.should.equal 1
-      done()
-    .fail done
-    .done()
-
   it "attach watchers", ( done ) ->
-    watcher = ( e ) ->
-      e.key.should.equal "hconf.common"
-      e.value.should.equal "from fixtures"
-      e.type.should.equal "set"
+    watcher = ( key, old, value ) ->
+      key.should.equal "hconf.common"
+      value.should.equal "from fixtures"
       hconf.unwatch "hconf.common", watcher
       done()
 
@@ -59,8 +52,8 @@ describe "hconf", ->
     .done()
 
   it "watches for key patterns", ( done ) ->
-    watcher = ( e ) ->
-      e.key.indexOf( "hconf." ).should.equal 0
+    watcher = ( key, old, value ) ->
+      key.indexOf( "hconf." ).should.equal 0
       hconf.unwatch "hconf.*", watcher
       done()
 
@@ -78,10 +71,10 @@ describe "hconf", ->
       files : path.join fixtures, "dir2"
 
     hconf.get( "hconf.common" )
-    .then (val) ->
+    .then ( val ) ->
       val.should.equal "from dir2"
       hconf.get( "hconf.dir2.unique" )
-    .then (val) ->
+    .then ( val ) ->
       val.should.equal 2
       done()
     .fail done
@@ -94,6 +87,12 @@ describe "hconf", ->
       done()
     .fail done
     .done()
+
+  it "store uri", ( done ) ->
+    fs = new hconf.FileStore name: "hconf", file: "/a/b/c"
+    fs.uri().should.equal "hconf:file:/a/b/c"
+    done()
+
 
 
 
