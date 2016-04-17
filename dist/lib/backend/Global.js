@@ -9,7 +9,7 @@ minimatch = require("minimatch");
 
 Backend = require('./Backend');
 
-observable = require("observable");
+observable = require("node-observable");
 
 deepExtend = require("../utils/deepExtend");
 
