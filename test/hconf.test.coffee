@@ -26,12 +26,10 @@ describe "hconf", ->
       module : module
       files : path.join fixtures, "dir1"
 
-    hconf.get( "hconf.common" )
-    .then ( val ) ->
-      val.should.equal "from dir1"
-      hconf.get( "hconf.dir1.unique" )
-    .then ( val ) ->
-      val.should.equal 1
+    hconf.get( "hconf.common", 'hconf.dir1.unique' )
+    .then ( [common, unique] ) ->
+      common.should.equal "from dir1"
+      unique.should.equal 1
       done()
     .fail done
     .done()
@@ -80,19 +78,9 @@ describe "hconf", ->
     .fail done
     .done()
 
-  it "get()", ( done ) ->
-    hconf.get "hconf.common"
-    .then ( val ) ->
-      val.should.equal "from dir2"
-      done()
-    .fail done
-    .done()
-
   it "store uri", ( done ) ->
-    fs = new hconf.FileStore name: "hconf", file: "/a/b/c"
+    fs = new hconf.FileStore name : "hconf", file : "/a/b/c"
     fs.uri().should.equal "hconf:file:/a/b/c"
     done()
-
-
 
 

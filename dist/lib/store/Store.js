@@ -10,18 +10,20 @@ module.exports = Store = (function(_super) {
 
   function Store(_arg) {
     this.name = _arg.name, this.description = _arg.description, this.type = _arg.type;
+    this.requestedFrom = __bind(this.requestedFrom, this);
     this.saveSync = __bind(this.saveSync, this);
     this.save = __bind(this.save, this);
     this.loadSync = __bind(this.loadSync, this);
     this.load = __bind(this.load, this);
     this.uri = __bind(this.uri, this);
-    this.data = {};
     if (this.name == null) {
       throw new Error("missing option: name");
     }
     if (this.type == null) {
       throw new Error("missing option: type");
     }
+    this.data = {};
+    this.originators = [];
   }
 
   Store.prototype.uri = function() {
@@ -35,6 +37,12 @@ module.exports = Store = (function(_super) {
   Store.prototype.save = function() {};
 
   Store.prototype.saveSync = function() {};
+
+  Store.prototype.requestedFrom = function(mod) {
+    var filename;
+    filename = typeof mod === "string" ? mod : mod.filename || mod.id;
+    return this.originators.push(filename);
+  };
 
   Store.create = function(opt) {
     return Store.__super__.constructor.create.call(this, opt, __dirname);

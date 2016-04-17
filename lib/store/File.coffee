@@ -1,5 +1,4 @@
-denodeified = require "denodeified"
-dfs = denodeified.fs
+{dfs} = require "denodeified"
 fs = require "fs"
 path = require "path"
 Store = require "./Store"

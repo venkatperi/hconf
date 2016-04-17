@@ -1,11 +1,9 @@
-var Backend, Global, ObservableMap, deepExtend, isGlob, minimatch, observable, _,
+var Backend, Global, deepExtend, isGlob, minimatch, observable, _,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 _ = require("underscore");
-
-ObservableMap = require("observable-map");
 
 minimatch = require("minimatch");
 
@@ -37,17 +35,23 @@ Global = (function(_super) {
     this.unwatchAll = __bind(this.unwatchAll, this);
     this.unwatch = __bind(this.unwatch, this);
     this.watch = __bind(this.watch, this);
+    this.dump = __bind(this.dump, this);
     this.extend = __bind(this.extend, this);
     this.get = __bind(this.get, this);
     this.set = __bind(this.set, this);
+    this.clear = __bind(this.clear, this);
     this.watchers = {};
     this.globWatchers = {};
-    this.data = global.hconf.global.data;
+    this.clear();
     if (this.data == null) {
       throw new Error("no data?");
     }
-    this.data.on("changed", this.onDataChanged);
   }
+
+  Global.prototype.clear = function() {
+    this.data = global.hconf.global.data = observable({});
+    return this.data.on("changed", this.onDataChanged);
+  };
 
   Global.prototype.set = function(name, value) {
     var d, p, parts, _i, _len, _ref;
@@ -83,6 +87,10 @@ Global = (function(_super) {
 
   Global.prototype.extend = function(source) {
     return deepExtend(this.data, source);
+  };
+
+  Global.prototype.dump = function() {
+    return this.data;
   };
 
   Global.prototype.watch = function(keys, cb) {

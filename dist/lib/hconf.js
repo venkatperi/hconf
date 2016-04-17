@@ -23,7 +23,7 @@ hconf = _.extend(hconf, {
   };
 });
 
-["clear", "ready", "get", "getObject", "watch", "unwatch", "unwatchAll"].forEach(function(f) {
+["clear", "ready", 'dump', "get", "getObject", "watch", "unwatch", "unwatchAll"].forEach(function(f) {
   return hconf[f] = provider[f];
 });
 

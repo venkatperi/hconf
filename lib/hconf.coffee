@@ -12,10 +12,10 @@ hconf = _.extend hconf,
   Conf : Conf
   FileStore : require "./store/File"
 
-[ "then", "fail", "done", "promiseDispatch" ].forEach (f) ->
-  hconf[ f ] = (args) ->  provider.initialized[ f ] args
+[ "then", "fail", "done", "promiseDispatch" ].forEach ( f ) ->
+  hconf[ f ] = ( args ) ->  provider.initialized[ f ] args
 
-[ "clear", "ready", "get", "getObject", "watch", "unwatch", "unwatchAll" ].forEach (f) ->
+[ "clear", "ready", 'dump', "get", "getObject", "watch", "unwatch", "unwatchAll" ].forEach ( f ) ->
   hconf[ f ] = provider[ f ]
 
 module.exports = hconf

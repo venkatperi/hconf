@@ -8,7 +8,7 @@ module.exports = TypedClass = (function() {
   function TypedClass() {}
 
   TypedClass.create = function(opt, dir) {
-    var er, klass, type;
+    var klass, type;
     if (opt == null) {
       opt = {};
     }
@@ -19,13 +19,8 @@ module.exports = TypedClass = (function() {
       dir = __dirname;
     }
     type = capitalize(opt.type);
-    try {
-      klass = require(path.join(dir, type));
-      return new klass(opt);
-    } catch (_error) {
-      er = _error;
-      throw new Error("bad or missing type: " + opt.type);
-    }
+    klass = require(path.join(dir, type));
+    return new klass(opt);
   };
 
   return TypedClass;

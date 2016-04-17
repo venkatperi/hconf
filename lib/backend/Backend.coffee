@@ -10,5 +10,7 @@ module.exports = class Backend extends TypedClass
 
   extend : ( from ) => throw new Error "virtual function called"
 
+  dump : => throw new Error "virtual function called"
+
   @create : ( opt ) -> super opt, __dirname
 

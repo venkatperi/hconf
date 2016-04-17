@@ -9,8 +9,5 @@ module.exports = class TypedClass
     dir = __dirname unless dir?
 
     type = capitalize opt.type
-    try
-      klass = require path.join dir, type
-      return new klass opt
-    catch er
-      throw new Error "bad or missing type: #{opt.type}"
+    klass = require path.join dir, type
+    return new klass opt

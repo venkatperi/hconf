@@ -1,6 +1,7 @@
 --require coffee-script/register
 --compilers coffee:coffee-script/register
 --timeout 5000
+--harmony_proxies
 -R spec
 test/*.coffee
 

@@ -9,6 +9,7 @@ module.exports = Backend = (function(_super) {
   __extends(Backend, _super);
 
   function Backend() {
+    this.dump = __bind(this.dump, this);
     this.extend = __bind(this.extend, this);
     this.set = __bind(this.set, this);
     this.get = __bind(this.get, this);
@@ -26,6 +27,10 @@ module.exports = Backend = (function(_super) {
   };
 
   Backend.prototype.extend = function(from) {
+    throw new Error("virtual function called");
+  };
+
+  Backend.prototype.dump = function() {
     throw new Error("virtual function called");
   };
 

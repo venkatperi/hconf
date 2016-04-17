@@ -1,10 +1,8 @@
 _ = require "underscore"
-ObservableMap = require "observable-map"
 minimatch = require "minimatch"
 Backend = require './Backend'
-observable = require "observable"
+observable = require "node-observable"
 deepExtend = require "../utils/deepExtend"
-
 
 isGlob = ( key ) ->
   /[\*\+\{\}]/.test
@@ -14,14 +12,16 @@ unless global.hconf?
     global :
       data : observable {}
 
-
 class Global extends Backend
 
   constructor : () ->
     @watchers = {}
     @globWatchers = {}
-    @data = global.hconf.global.data
+    @clear()
     throw new Error "no data?" unless @data?
+
+  clear : =>
+    @data = global.hconf.global.data = observable {}
     @data.on "changed", @onDataChanged
 
   set : ( name, value ) =>
@@ -44,6 +44,9 @@ class Global extends Backend
   extend : ( source ) =>
     deepExtend @data, source
 
+  dump : =>
+    @data
+
   watch : ( keys, cb ) =>
     keys = [ keys ] unless _.isArray keys
     for k in keys
@@ -62,7 +65,7 @@ class Global extends Backend
       return @globWatchers[ key ] = new Set() if isGlob key
       @watchers[ key ] = new Set()
 
-#Private
+  #Private
 
   onDataChanged : ( key, old, value ) =>
     @getWatchers( key ).forEach ( cb ) -> cb key, old, value
@@ -77,6 +80,5 @@ class Global extends Backend
   getGlobWatchers : ( key ) =>
     @globWatchers[ key ] = new Set() unless @globWatchers[ key ]?
     @globWatchers[ key ]
-
 
 module.exports = Global
