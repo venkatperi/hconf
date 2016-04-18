@@ -1,3 +1,6 @@
+doc/
 logs/
+*.log
 node_modules/
 .idea/
+dist/
