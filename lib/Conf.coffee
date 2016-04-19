@@ -9,7 +9,6 @@ Backend = require "./backend"
 conventions = require "./conventions"
 custom = require "./conventions/custom"
 asArray = require './utils/asArray'
-#dependson = require "dependson"
 StoreCollection = require "./store/StoreCollection"
 EventEmitter = require( 'events' ).EventEmitter
 
@@ -17,6 +16,7 @@ EventEmitter = require( 'events' ).EventEmitter
 class Conf extends EventEmitter
 
   constructor : ( @opts = {} ) ->
+    @opts.defaults = {} unless @opts.defaults?
     @clear()
 
   clear : =>
@@ -25,6 +25,7 @@ class Conf extends EventEmitter
 
     @seq = new Seq()
     @backend = Backend.create type : "global"
+#    @env = Backend.create type : "env"
     @backend.clear()
     @stores = new StoreCollection()
     @loadingTimer = new ManualTimer @onLoaded, 100
@@ -38,7 +39,8 @@ class Conf extends EventEmitter
   get : ( name... ) =>
     @initialized.then =>
       res = for n in name
-        @backend.get n
+        @backend.get( n ) or @opts.defaults[ n ]
+
       if name.length == 1 then res[ 0 ] else res
 
   dump : =>

@@ -1,16 +1,28 @@
 TypedClass = require "../TypedClass"
 
 module.exports = class Backend extends TypedClass
-  constructor : ->
-    throw new Error "missing option: name" unless @name?
+  get : ( name ) =>
+    return unless name?
+    parts = name.split "."
+    d = @data
+    for p in parts
+      d = d[ p ]
+      return unless d?
+    d
 
-  get : ( name ) => throw new Error "virtual function called"
+  set : ( name, value ) =>
+    parts = name.split "."
+    d = @data
+    for p in parts[ 0..-2 ]
+      d[ p ] = {} unless d[ p ]?
+      d = d[ p ]
+    d[ parts[ parts.length - 1 ] ] = value
 
-  set : ( name, value ) => throw new Error "virtual function called"
 
   extend : ( from ) => throw new Error "virtual function called"
 
-  dump : => throw new Error "virtual function called"
+  dump : =>
+    @data
 
   @create : ( opt ) -> super opt, __dirname
 

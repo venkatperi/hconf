@@ -14,7 +14,7 @@ unless global.hconf?
 
 class Global extends Backend
 
-  constructor : () ->
+  constructor : ->
     @watchers = {}
     @globWatchers = {}
     @clear()
@@ -24,28 +24,6 @@ class Global extends Backend
     @data = global.hconf.global.data = observable {}
     @data.on "changed", @onDataChanged
 
-  set : ( name, value ) =>
-    parts = name.split "."
-    d = @data
-    for p in parts[ 0..-2 ]
-      d[ p ] = {} unless d[ p ]?
-      d = d[ p ]
-    d[ parts[ parts.length - 1 ] ] = value
-
-  get : ( name ) =>
-    return unless name?
-    parts = name.split "."
-    d = @data
-    for p in parts
-      d = d[ p ]
-      return unless d?
-    d
-
-  extend : ( source ) =>
-    deepExtend @data, source
-
-  dump : =>
-    @data
 
   watch : ( keys, cb ) =>
     keys = [ keys ] unless _.isArray keys
