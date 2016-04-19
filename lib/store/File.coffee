@@ -22,9 +22,9 @@ module.exports = class FileStore extends Store
       @file = path.join @file, ".#{@name}"
       dfs.stat @file
     .then ( stat ) =>
-      return unless stat.isFile()
-      dfs.readFile @file, "utf8"
+      dfs.readFile @file, "utf8" if stat.isFile()
     .then ( fileData ) =>
+      return unless fileData?
       fileData = fileData.substr( 1 ) if fileData.charAt( 0 ) == '\ufeff'
       @data = @format.parse( fileData )
       @

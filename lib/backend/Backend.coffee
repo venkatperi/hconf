@@ -1,28 +1,20 @@
 TypedClass = require "../TypedClass"
+deepExtend = require "../utils/deepExtend"
+prop = require '../utils/prop'
 
 module.exports = class Backend extends TypedClass
-  get : ( name ) =>
-    return unless name?
-    parts = name.split "."
-    d = @data
-    for p in parts
-      d = d[ p ]
-      return unless d?
-    d
 
-  set : ( name, value ) =>
-    parts = name.split "."
-    d = @data
-    for p in parts[ 0..-2 ]
-      d[ p ] = {} unless d[ p ]?
-      d = d[ p ]
-    d[ parts[ parts.length - 1 ] ] = value
+  constructor : -> @clear()
 
+  get : ( name ) => prop.get @data, name
 
-  extend : ( from ) => throw new Error "virtual function called"
+  set : ( name, value ) => prop.set @data, name, value
 
-  dump : =>
-    @data
+  clear : => @data = {}
+
+  extend : ( from ) => deepExtend @data, from if from?
+
+  dump : => @data
 
   @create : ( opt ) -> super opt, __dirname
 

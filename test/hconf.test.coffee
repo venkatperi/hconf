@@ -21,6 +21,12 @@ describe "hconf", ->
     .fail done
     .done()
 
+  it "emits 'ready' event", ( done ) ->
+    conf = new hconf.Conf()
+    conf.on "ready", done
+    conf.load module: module
+
+
   it "loads a config file", ( done ) ->
     hconf
       module : module
@@ -31,35 +37,6 @@ describe "hconf", ->
       common.should.equal "from dir1"
       unique.should.equal 1
       done()
-    .fail done
-    .done()
-
-  it "attach watchers", ( done ) ->
-    watcher = ( key, old, value ) ->
-      key.should.equal "hconf.common"
-      value.should.equal "from fixtures"
-      hconf.unwatch "hconf.common", watcher
-      done()
-
-    hconf.watch "hconf.common", watcher
-
-    hconf
-      module : module
-      files : path.join fixtures
-    .fail done
-    .done()
-
-  it "watches for key patterns", ( done ) ->
-    watcher = ( key, old, value ) ->
-      key.indexOf( "hconf." ).should.equal 0
-      hconf.unwatch "hconf.*", watcher
-      done()
-
-    hconf.watch "hconf.*", watcher
-
-    hconf
-      module : module
-      files : path.join fixtures, "pattern"
     .fail done
     .done()
 
@@ -78,9 +55,26 @@ describe "hconf", ->
     .fail done
     .done()
 
-  it "store uri", ( done ) ->
-    fs = new hconf.FileStore name : "hconf", file : "/a/b/c"
-    fs.uri().should.equal "hconf:file:/a/b/c"
-    done()
+  it "loads env vars", ( done ) ->
+    hconf
+      module : module
 
+    hconf.get( "hconf.env" )
+    .then ( env ) ->
+      env.should.equal "from env"
+      done()
+    .fail done
+    .done()
 
+  it "env vars take precedence", ( done ) ->
+    hconf
+      module : module
+      files : path.join fixtures, "dir2"
+
+    hconf.get( "hconf.common", "hconf.env" )
+    .then ( [common, env] ) ->
+      common.should.equal "from dir2"
+      env.should.equal "from env"
+      done()
+    .fail done
+    .done()

@@ -9,9 +9,7 @@
   "description": "Hierarchical configs using nconf",
   "dependencies": {
     "denodeified": "^1.0.1",
-    "minimatch": "^3.0.0",
     "moduletag": "^1.0.2",
-    "node-observable": "^1.0.1",
     "pkginfo-async": "^1.0.5",
     "q": "^1.4.1",
     "seqx": "^1.0.2",
@@ -27,7 +25,7 @@
   "main": "dist/index",
   "scripts": {
     "prepublish": "grunt",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "HCONF_HCONF_ENV=\"from env\" mocha"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
