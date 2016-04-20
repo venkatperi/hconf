@@ -22,16 +22,14 @@ For example, if `package2` uses `package1` and both packages use `hconf` for con
 ```json
 /* .package1 */
 {
-  "package1": {
-    "some" : {
-      "var" : "from package 1"
-    }
+  "some" : {
+    "var" : "from package 1"
   }
 }
 ```
 
 ```coffeescript
-# package1/index.coffee 
+# package1/index.coffee
 hconf = require('hconf')(module:module)
 
 hconf.get("package1.some.var")
@@ -44,14 +42,14 @@ hconf.get("package1.some.var")
 ```json
 /* .package2 */
 {
-  "package2": {
-    "some" : {
-      "var" : "from package 2"
-    }
+  "some" : {
+    "var" : "from package 2"
   },
-  "package1": {
-    "some" : {
-      "var" : "now from package 2"
+  "__packages" : {
+    "package1": {
+      "some" : {
+        "var" : "now from package 2"
+      }
     }
   }
 }
@@ -85,23 +83,6 @@ npm install hconf
 hconf = require("hconf") module: module
 ```
 
-## Example
-### Get config setting
-
-```coffeescript
-#package some-pkg
-hconf.get("some-pkg.a.b.c")
-.then (value) ->
-  console.log "#{a.b.c}: #{value}"
-```
-
-# #
-## Sample Config File
-
-```json
-{
-  "hconf": {
-    "factory": "defaults"
-  }
-}
-```
+## `get(key, [key...])`
+- `key` {`String`} configuration key to retrieve
+- Returns a `Promise` which resolves to the requested value(s) (or undefined).

@@ -24,8 +24,7 @@ describe "hconf", ->
   it "emits 'ready' event", ( done ) ->
     conf = new hconf.Conf()
     conf.on "ready", done
-    conf.load module: module
-
+    conf.load module : module
 
   it "loads a config file", ( done ) ->
     hconf
@@ -75,6 +74,20 @@ describe "hconf", ->
     .then ( [common, env] ) ->
       common.should.equal "from dir2"
       env.should.equal "from env"
+      done()
+    .fail done
+    .done()
+
+  it "modify config of other packages", ( done ) ->
+    hconf
+      module : module
+      files : path.join fixtures, "other"
+
+    hconf.get( "hconf.common", "hconf.other.unique", "package1.some.var" )
+    .then ( [common, unique, pkg1] ) ->
+      common.should.equal "from other"
+      unique.should.equal 99
+      pkg1.should.equal "for package 1"
       done()
     .fail done
     .done()

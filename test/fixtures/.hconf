@@ -1,8 +1,6 @@
 {
-  "hconf": {
-    "fixtures": {
-      "unique": 0
-    },
-    "common": "from fixtures"
-  }
+  "fixtures": {
+    "unique": 0
+  },
+  "common": "from fixtures"
 }

@@ -1,9 +1,7 @@
 {
-  "hconf": {
-    "dir2": {
-      "unique": 2
-    },
-    "env": "from dir2",
-    "common": "from dir2"
-  }
+  "dir2": {
+    "unique": 2
+  },
+  "env": "from dir2",
+  "common": "from dir2"
 }

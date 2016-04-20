@@ -1,5 +1,6 @@
 _ = require "underscore"
 Q = require "q"
+deepmerge = require 'deepmerge'
 pkgInfo = require "pkginfo-async"
 Seq = require "seqx"
 ManualTimer = require "./utils/ManualTimer"
@@ -72,15 +73,24 @@ class Conf extends EventEmitter
   #
   # Returns the [Description] as `undefined`.
   applyConventions : ( opts ) => ( pkg ) =>
-    @addStore( c, opts.module ) for c in conventions( _.extend opts, pkg : pkg )
+    @addStore( c, pkg.name, opts.module ) for c in conventions( _.extend opts, pkg : pkg )
 
   # Private: Add a store to the config
   #
   # * `store ` The [description] as {[type]}.
   #
   # Returns the [Description] as `undefined`.
-  addStore : ( store, mod ) =>
+  addStore : ( store, prefix, mod ) =>
     @seq.add => @stores.add store, mod
-    @seq.add ( s ) => @backend.extend s.data if s?
+    @seq.add ( s ) =>
+      return unless s?
+      pkgConfig = deepmerge {}, s.data
+      delete pkgConfig.__packages if pkgConfig.__packages?
+      @backend.extend "#{prefix}" : pkgConfig if s?
+
+      # merge configs for other packages, if present
+      return unless s.data.__packages?
+      for own p, cfg of s.data.__packages
+        @backend.extend "#{p}" : cfg
 
 module.exports = Conf

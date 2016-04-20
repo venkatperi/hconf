@@ -1,0 +1,13 @@
+{
+  "other": {
+    "unique": 99
+  },
+  "common": "from other",
+  "__packages": {
+    "package1": {
+      "some": {
+        "var": "for package 1"
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
+deepmerge = require 'deepmerge'
 TypedClass = require "../TypedClass"
-deepExtend = require "../utils/deepExtend"
 prop = require '../utils/prop'
 
 module.exports = class Backend extends TypedClass
@@ -12,7 +12,7 @@ module.exports = class Backend extends TypedClass
 
   clear : => @data = {}
 
-  extend : ( from ) => deepExtend @data, from if from?
+  extend : ( from ) => @data = deepmerge @data, from if from?
 
   dump : => @data
 
