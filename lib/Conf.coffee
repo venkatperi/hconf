@@ -86,11 +86,15 @@ class Conf extends EventEmitter
       return unless s?
       pkgConfig = deepmerge {}, s.data
       delete pkgConfig.__packages if pkgConfig.__packages?
-      @backend.extend "#{prefix}" : pkgConfig if s?
+      c = {}
+      c[prefix] = pkgConfig
+      @backend.extend c 
 
       # merge configs for other packages, if present
       return unless s.data.__packages?
       for own p, cfg of s.data.__packages
-        @backend.extend "#{p}" : cfg
+        c = {}
+        c[p] = cfg
+        @backend.extend c
 
 module.exports = Conf
