@@ -11,7 +11,7 @@
     "deepmerge": "^0.2.10",
     "denodeified": "^1.0.1",
     "moduletag": "^1.0.2",
-    "pkginfo-async": "^1.0.6",
+    "pkginfo-async": "^1.0.7",
     "q": "^1.4.1",
     "seqx": "^1.0.2",
     "traverse": "^0.6.6",
@@ -26,7 +26,7 @@
   "main": "dist/index",
   "scripts": {
     "prepublish": "grunt",
-    "test": "HCONF_HCONF_ENV=\"from env\" mocha"
+    "test": "HCONF_ENV=\"from env\" mocha"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
