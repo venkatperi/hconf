@@ -11,7 +11,7 @@
     "deepmerge": "^0.2.10",
     "denodeified": "^1.0.1",
     "moduletag": "^1.0.2",
-    "pkginfo-async": "^1.0.5",
+    "pkginfo-async": "^1.0.6",
     "q": "^1.4.1",
     "seqx": "^1.0.2",
     "traverse": "^0.6.6",
